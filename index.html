@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>VECTOR QUEST</title>
+<style>
+:root{--bg:#080b16;--card:#11172a;--line:#283250;--text:#f4f7ff;--muted:#9da8c5;--accent:#62e6ff;--accent2:#9b7cff;--good:#58e39b;--bad:#ff6b83}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at 20% 10%,#18234a 0,#080b16 42%),#080b16;color:var(--text);min-height:100vh}
+button,input{font:inherit}.wrap{max-width:1050px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.logo{font-weight:900;letter-spacing:3px;font-size:20px}.pill{border:1px solid var(--line);padding:8px 13px;border-radius:999px;color:var(--muted);font-size:13px}
+.screen{display:none}.screen.active{display:block}.hero{min-height:82vh;display:grid;place-items:center;text-align:center}.heroBox{max-width:760px}.tag{display:inline-block;padding:7px 12px;border:1px solid #31506c;border-radius:999px;color:var(--accent);font-size:12px;letter-spacing:1px}.hero h1{font-size:clamp(48px,9vw,94px);margin:18px 0 4px;letter-spacing:6px}.hero h1 span{color:var(--accent)}.hero p{color:var(--muted);font-size:18px;line-height:1.6}.btn{border:0;border-radius:13px;padding:13px 22px;background:linear-gradient(135deg,var(--accent),#7b8cff);color:#061019;font-weight:900;cursor:pointer;box-shadow:0 10px 30px #0006}.btn.secondary{background:#171e35;color:var(--text);border:1px solid var(--line);box-shadow:none}.levels{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.levelDot{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center;color:var(--muted);font-weight:800}.levelDot.current{border-color:var(--accent);color:var(--accent);box-shadow:0 0 20px #62e6ff22}.levelDot.done{background:#173729;border-color:#2c7755;color:var(--good)}
+.card{background:linear-gradient(180deg,#121a30ee,#0d1325ee);border:1px solid var(--line);border-radius:22px;padding:26px;box-shadow:0 18px 60px #0006}.mission{color:var(--accent);font-size:12px;letter-spacing:2px;font-weight:800}.title{font-size:32px;margin:8px 0 20px}.question{font-size:21px;line-height:1.6}.diagram{background:#090e1c;border:1px solid var(--line);border-radius:17px;margin:20px 0;padding:15px}.diagram svg{width:100%;height:220px}.options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}.opt{background:#151d34;border:1px solid #2a3656;color:var(--text);padding:16px;border-radius:14px;text-align:left;cursor:pointer}.opt:hover{border-color:var(--accent)}.feedback{min-height:26px;margin:17px 0;font-weight:800}.good{color:var(--good)}.bad{color:var(--bad)}.codeBox{display:flex;gap:10px;margin-top:15px}.codeBox input{flex:1;background:#080d19;border:1px solid var(--line);color:white;border-radius:12px;padding:13px;text-align:center;letter-spacing:3px;text-transform:uppercase}.small{color:var(--muted);font-size:13px}.result{text-align:center;padding:50px 20px}.result h2{font-size:46px}.stats{display:flex;justify-content:center;gap:30px;margin:25px 0}.stat b{display:block;font-size:27px;color:var(--accent)}@media(max-width:650px){.options{grid-template-columns:1fr}.wrap{padding:15px}.card{padding:19px}.question{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="logo">VECTOR QUEST</div>
+    <div class="pill" id="scorePill">SCORE 0</div>
+  </div>
+
+  <section id="start" class="screen active hero">
+    <div class="heroBox">
+      <div class="tag">PHYSICS • GRADE 9</div>
+      <h1>VECTOR <span>QUEST</span></h1>
+      <p>Calculate. Unlock. Advance.<br>Master 1D vectors, 2D vectors, magnitude and direction.</p>
+      <button class="btn" onclick="startGame()">START MISSION</button>
+      <p class="small">4 levels • instant feedback • final score</p>
+    </div>
+  </section>
+
+  <section id="game" class="screen">
+    <div class="levels" id="levelBar"></div>
+    <div class="card">
+      <div class="mission" id="mission"></div>
+      <div class="title" id="title"></div>
+      <div class="question" id="question"></div>
+      <div class="diagram" id="diagram"></div>
+      <div class="options" id="options"></div>
+      <div class="feedback" id="feedback"></div>
+      <div id="nextArea"></div>
+    </div>
+  </section>
+
+  <section id="finish" class="screen result">
+    <div class="card">
+      <div class="tag">MISSION COMPLETE</div>
+      <h2>VECTOR MASTER ⚡</h2>
+      <p class="small">You completed the Vector Quest.</p>
+      <div class="stats">
+        <div class="stat"><b id="finalScore">0</b>Score</div>
+        <div class="stat"><b id="finalTime">0s</b>Time</div>
+      </div>
+      <button class="btn" onclick="restart()">PLAY AGAIN</button>
+    </div>
+  </section>
+</div>
+
+<script>
+const levels=[
+{
+ mission:"LEVEL 01 • 1D",
+ title:"Resultant on a Straight Line",
+ q:"A drone moves +15 m East, then 6 m West. What is the resultant displacement?",
+ options:["9 m East","21 m East","9 m West","21 m West"], answer:0, code:"9",
+ svg:`<svg viewBox="0 0 700 220"><defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#62e6ff"/></marker><marker id="b" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#ff6b83"/></marker></defs><line x1="70" y1="115" x2="610" y2="115" stroke="#53617f" stroke-width="3"/><line x1="100" y1="115" x2="410" y2="115" stroke="#62e6ff" stroke-width="8" marker-end="url(#a)"/><line x1="410" y1="145" x2="286" y2="145" stroke="#ff6b83" stroke-width="8" marker-end="url(#b)"/><text x="230" y="90" fill="#62e6ff" font-size="22">+15 m East</text><text x="285" y="185" fill="#ff6b83" font-size="22">6 m West</text><text x="555" y="105" fill="#9da8c5" font-size="18">E</text></svg>`
+},
+{
+ mission:"LEVEL 02 • 2D",
+ title:"Find the Magnitude",
+ q:"A robot moves 6 m East and 8 m North. What is the magnitude of the resultant vector?",
+ options:["10 m","14 m","2 m","48 m"], answer:0, code:"10",
+ svg:`<svg viewBox="0 0 700 220"><defs><marker id="c" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#62e6ff"/></marker></defs><line x1="120" y1="175" x2="540" y2="175" stroke="#53617f" stroke-width="2"/><line x1="120" y1="175" x2="120" y2="35" stroke="#53617f" stroke-width="2"/><line x1="120" y1="175" x2="390" y2="175" stroke="#62e6ff" stroke-width="8" marker-end="url(#c)"/><line x1="390" y1="175" x2="390" y2="75" stroke="#9b7cff" stroke-width="8" marker-end="url(#c)"/><line x1="120" y1="175" x2="390" y2="75" stroke="#58e39b" stroke-width="7" marker-end="url(#c)"/><text x="220" y="205" fill="#62e6ff" font-size="21">6 m East</text><text x="400" y="125" fill="#9b7cff" font-size="21">8 m North</text><text x="225" y="105" fill="#58e39b" font-size="21">R = ?</text></svg>`
+},
+{
+ mission:"LEVEL 03 • DIRECTION",
+ title:"Find the Angle",
+ q:"A vector has components 8 m East and 6 m North. What is its direction angle above the horizontal?",
+ options:["36.9°","53.1°","45°","30°"], answer:0, code:"36.9",
+ svg:`<svg viewBox="0 0 700 220"><defs><marker id="d" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#58e39b"/></marker></defs><line x1="110" y1="175" x2="590" y2="175" stroke="#53617f" stroke-width="3"/><line x1="110" y1="175" x2="110" y2="35" stroke="#53617f" stroke-width="3"/><line x1="110" y1="175" x2="430" y2="55" stroke="#58e39b" stroke-width="9" marker-end="url(#d)"/><path d="M170 175 A60 60 0 0 0 158 153" fill="none" stroke="#62e6ff" stroke-width="4"/><text x="175" y="165" fill="#62e6ff" font-size="24">θ</text><text x="260" y="205" fill="#9da8c5" font-size="20">8 m East</text><text x="445" y="85" fill="#9da8c5" font-size="20">6 m North</text></svg>`
+},
+{
+ mission:"LEVEL 04 • FINAL",
+ title:"The Vector Challenge",
+ q:"Three forces act on a rover: 12 N East, 5 N North, and 4 N West. What is the resultant magnitude?",
+ options:["13 N","17 N","9 N","21 N"], answer:0, code:"13",
+ svg:`<svg viewBox="0 0 700 220"><defs><marker id="e" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#62e6ff"/></marker></defs><line x1="90" y1="150" x2="610" y2="150" stroke="#53617f" stroke-width="3"/><line x1="250" y1="150" x2="520" y2="150" stroke="#62e6ff" stroke-width="8" marker-end="url(#e)"/><line x1="250" y1="150" x2="140" y2="150" stroke="#ff6b83" stroke-width="8" marker-end="url(#e)"/><line x1="250" y1="150" x2="250" y2="50" stroke="#9b7cff" stroke-width="8" marker-end="url(#e)"/><text x="350" y="135" fill="#62e6ff" font-size="20">12 N E</text><text x="105" y="180" fill="#ff6b83" font-size="20">4 N W</text><text x="270" y="75" fill="#9b7cff" font-size="20">5 N N</text></svg>`
+}
+];
+
+let current=0,score=0,answered=false,startTime=0;
+
+function startGame(){current=0;score=0;startTime=Date.now();show("game");render();}
+function show(id){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");}
+function render(){
+ answered=false; const l=levels[current];
+ document.getElementById("scorePill").textContent="SCORE "+score;
+ document.getElementById("mission").textContent=l.mission;
+ document.getElementById("title").textContent=l.title;
+ document.getElementById("question").textContent=l.q;
+ document.getElementById("diagram").innerHTML=l.svg;
+ document.getElementById("feedback").textContent="";
+ document.getElementById("nextArea").innerHTML="";
+ const opts=document.getElementById("options");opts.innerHTML="";
+ l.options.forEach((o,i)=>{let b=document.createElement("button");b.className="opt";b.textContent=String.fromCharCode(65+i)+") "+o;b.onclick=()=>answer(i);opts.appendChild(b)});
+ document.getElementById("levelBar").innerHTML=levels.map((_,i)=>`<div class="levelDot ${i<current?"done":i===current?"current":""}">${i+1}</div>`).join("");
+}
+function answer(i){
+ if(answered)return; answered=true;
+ const l=levels[current], fb=document.getElementById("feedback");
+ if(i===l.answer){score+=100;document.getElementById("scorePill").textContent="SCORE "+score;fb.className="feedback good";fb.textContent="✓ CORRECT! UNLOCK CODE: "+l.code;
+ document.getElementById("nextArea").innerHTML=`<div class="codeBox"><input id="code" placeholder="ENTER CODE"><button class="btn" onclick="unlock()">UNLOCK</button></div>`;
+ }else{answered=false;fb.className="feedback bad";fb.textContent="✕ Not quite. Try again."; }
+}
+function unlock(){
+ const input=document.getElementById("code").value.trim();
+ if(input===levels[current].code){
+   current++;
+   if(current>=levels.length){finish();}else render();
+ }else{
+   const fb=document.getElementById("feedback");fb.className="feedback bad";fb.textContent="✕ Wrong code. Check your calculation and try again.";answered=true;
+ }
+}
+function finish(){show("finish");document.getElementById("finalScore").textContent=score;document.getElementById("finalTime").textContent=Math.round((Date.now()-startTime)/1000)+"s";}
+function restart(){show("start");}
+</script>
+</body>
+</html>
